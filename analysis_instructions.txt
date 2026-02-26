@@ -1,0 +1,82 @@
+In this phase, you will do a systematic analysis of your project. Here are the steps of your project:
+
+0. Create a goal for your project from the proposal you submitted. Articulate that goal in a short paragraph.
+
+1. Familiarize yourself with the data sets. Here are questions that I want you to answer:
+
+What is the dataset size (how many rows and columns)?
+What are the column names?
+Classify each column as categorical, ordinal, discrete, or continuous.
+For categorical data, find the discrete values.
+For categorical data, find the distribution of the discrete values. In particular, identify the mode.
+For quantitative data (discrete or continuous), find the range, median, mean, and standard deviation. What are the units? Please do this for columns where it makes sense. If the column contains Social Security numbers, the statistics mentioned are irrelevant.
+2. In this step, you will have to do data wrangling. 
+
+Find all missing data. 
+If it makes sense, replace missing categorical data with the mode and replace quantitative data with the mean.
+You may remove a row with missing data. Record your reasoning for doing so.
+Make sure that all the data is within the expected range. For example, you should not have negative salaries.
+Make sure that all the data is in the correct format.
+Check for duplicates and remove them if it makes sense.
+3. Do an initial statistical analysis of your datasets.
+
+Check for correlation among columns. Find the Pearson correlation coefficient among quantitative data. 
+If the correlation coefficient is high, check for the best fit - linear, quadratic, or cubic. 
+4. Read the paper on Storytelling by Robert Kosara and Jock Mackinlay. Look for this paper on Canvas under Files -> Project. Create a short narration of 5 minutes or less. Check out Hans Rosling's video on YouTube on Population Growth:
+
+https://www.youtube.com/watch?v=jbkSRLYSojoLinks 
+
+
+5. Research Machine Learning Models that you can use to test your hypothesis
+
+6. Write a report on your analysis. The following is the format of your report:
+
+Title of Final Project:
+
+Group Number:
+
+Student Name:
+
+Student UT EID:
+
+Student Name:
+
+Student UT EID:
+
+Student Name:
+
+Student UT EID:
+
+Date:
+
+Goal (or Thesis)
+
+Description of the Datasets
+
+Size of the datasets
+Column Names
+Classification of each column
+List of Discrete Values for Categorical Variables
+Distribution of Discrete Variables
+Distribution of Quantitative Variables
+Data Wrangling
+
+List missing data 
+Replacement of missing data (if any)
+Deletion of rows (if any) and reasons
+Check that the data is in the correct range
+Check that the data is in the correct format.
+Check for duplicates and remove them (if any)
+Preliminary Statistical Analysis
+
+Determination of the Pearson correlation coefficient among quantitative data
+Determination of the best fit among highly correlated quantities - linear, quadratic, or cubic
+Machine Learning Models
+
+List and describe the machine learning models you will use to test your hypothesis.
+Narration
+
+Present in a bulleted form your narration
+Use the group number assigned to you. This group number should be the same for all phases of your project.
+
+Your report must be in Times New Roman font 12 pt, 1.5 line spacing, and in PDF. You do not have to submit the Jupyter Notebook.
