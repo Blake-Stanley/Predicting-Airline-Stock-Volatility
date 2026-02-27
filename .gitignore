@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Word temp/lock files (created when a doc is open)
+~$*
+
+# Windows thumbnail cache
+Thumbs.db
+desktop.ini
