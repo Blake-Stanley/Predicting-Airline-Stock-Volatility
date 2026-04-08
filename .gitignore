@@ -212,3 +212,5 @@ __marimo__/
 # Windows thumbnail cache
 Thumbs.db
 desktop.ini
+
+.claude
