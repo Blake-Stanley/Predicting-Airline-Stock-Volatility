@@ -1,0 +1,109 @@
+{
+  "tickers": [
+    "DAL",
+    "UAL",
+    "LUV",
+    "JETS"
+  ],
+  "model_families": [
+    "OLS",
+    "Ridge",
+    "Random Forest",
+    "XGBoost"
+  ],
+  "feature_specs": {
+    "HAR-RV": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly"
+    ],
+    "HAR-RV+OVX": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly",
+      "log_ovx_daily",
+      "log_ovx_weekly",
+      "log_ovx_monthly"
+    ],
+    "HAR-RV+OVX+TOSI": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly",
+      "log_ovx_daily",
+      "log_ovx_weekly",
+      "log_ovx_monthly",
+      "tosi_level",
+      "tosi_change"
+    ],
+    "HAR-RV+IV": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly",
+      "log_iv_daily"
+    ],
+    "HAR-RV+IV+OVX": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly",
+      "log_iv_daily",
+      "log_ovx_daily",
+      "log_ovx_weekly",
+      "log_ovx_monthly"
+    ],
+    "HAR-RV+IV+OVX+TOSI": [
+      "log_rv_daily",
+      "log_rv_weekly",
+      "log_rv_monthly",
+      "log_iv_daily",
+      "log_ovx_daily",
+      "log_ovx_weekly",
+      "log_ovx_monthly",
+      "tosi_level",
+      "tosi_change"
+    ]
+  },
+  "spec_short": {
+    "HAR-RV": "HAR-RV",
+    "HAR-RV+OVX": "+OVX",
+    "HAR-RV+OVX+TOSI": "+OVX+TOSI",
+    "HAR-RV+IV": "+IV",
+    "HAR-RV+IV+OVX": "+IV+OVX",
+    "HAR-RV+IV+OVX+TOSI": "+IV+OVX+TOSI"
+  },
+  "airline_colors": {
+    "DAL": "#0B6E4F",
+    "UAL": "#3C91E6",
+    "LUV": "#F4A259",
+    "JETS": "#7A5195"
+  },
+  "model_colors": {
+    "OLS": "#2D3047",
+    "Ridge": "#0B6E4F",
+    "Random Forest": "#F58518",
+    "XGBoost": "#C75146"
+  },
+  "spec_colors": {
+    "HAR-RV": "#7A5195",
+    "HAR-RV+OVX": "#F4A259",
+    "HAR-RV+OVX+TOSI": "#2D3047",
+    "HAR-RV+IV": "#0B6E4F",
+    "HAR-RV+IV+OVX": "#C75146",
+    "HAR-RV+IV+OVX+TOSI": "#3C91E6"
+  },
+  "shaded_periods": [
+    [
+      "2022-02-01",
+      "2022-08-31",
+      "Energy shock"
+    ],
+    [
+      "2024-05-01",
+      "2026-02-15",
+      "Walk-forward OOS"
+    ]
+  ],
+  "sqrt2_pi": 0.7978845608028654,
+  "trade_frac_warn": 0.2,
+  "oos_start": "2024-05-03",
+  "oos_end": "2026-02-11"
+}
