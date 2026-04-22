@@ -420,6 +420,7 @@ def page_background(meta):
         y=avg, line_dash='dash', line_color=PALETTE['mute'],
         annotation_text=f'sector avg {avg:.1f}%',
         annotation_font_color=PALETTE['ink_soft'],
+        annotation_yshift=15,
     )
     style_fig(fig_fuel, title='Fuel as % of Annual Operating Expenses', height=380)
     fig_fuel.update_layout(
