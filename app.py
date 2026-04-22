@@ -128,6 +128,15 @@ def page_hypothesis(meta):
         """
     )
 
+    st.info(
+        "**Central TOSI hypothesis:** The Texas Oil Stock Index (TOSI) — a sentiment "
+        "signal derived from oil-sector equity performance — adds statistically significant "
+        "predictive power for airline realized volatility *beyond* what price-based indicators "
+        "(HAR-RV, IV, OVX) already capture.  If oil-sector equity sentiment leads jet-fuel "
+        "cost expectations, it should front-run airline vol moves that lagged RV and options "
+        "pricing have not yet priced in."
+    )
+
     st.markdown("## Why it's non-trivial")
     st.markdown(
         """
@@ -294,6 +303,26 @@ def page_results(meta):
     st.plotly_chart(load_figure('dm_heatmap'), use_container_width=True)
     with st.expander('Raw DM test table'):
         st.dataframe(dm, use_container_width=True, hide_index=True)
+
+    st.subheader('TOSI hypothesis — verdict')
+    st.markdown(
+        """
+        **Does TOSI add predictive power?**  The Diebold-Mariano results above let us
+        answer directly:
+
+        * **No ticker reaches the 5% significance threshold** on either TOSI-increment
+          test ("TOSI adds to HAR-RV+OVX" or "TOSI adds to HAR-RV+IV+OVX").  The
+          smallest p-value is ~0.10 (DAL), and for LUV the DM statistic is *negative*
+          — TOSI hurt that ticker.
+        * **But the full HAR-RV+IV+OVX+TOSI spec achieves the lowest average RMSE**
+          of any combination (OLS, 0.7637 vs. HAR-RV baseline 0.7684) and is selected
+          as the per-ticker best for 3 of 4 names (DAL, UAL, JETS).
+        * **Conclusion:** TOSI's incremental contribution is too small for the DM test
+          to detect over the ~450-day OOS window, but its directional nudge is real
+          enough to improve ensemble point forecasts.  Treat it as a **weak auxiliary**
+          — useful in combination, not sufficient on its own.
+        """
+    )
 
     st.subheader('Forecast vs actual — JETS')
     st.plotly_chart(load_figure('jets_forecast'), use_container_width=True)
