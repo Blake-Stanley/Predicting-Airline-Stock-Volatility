@@ -474,7 +474,9 @@ def page_background(meta):
         "at crisis moments. The open question — which we test in the next tab — is "
         'whether it is *predictive* or merely *contemporaneous*.'
     )
-    st.plotly_chart(load_figure('oil_drivers'), use_container_width=True)
+    oil_fig = load_figure('oil_drivers')
+    oil_fig.data = tuple(t for t in oil_fig.data if t.name != 'Sector RV')
+    st.plotly_chart(oil_fig, use_container_width=True)
 
 
 def page_hypothesis(meta):
