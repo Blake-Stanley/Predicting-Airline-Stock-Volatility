@@ -283,7 +283,7 @@ def style_fig(fig: go.Figure, title: str | None = None, height: int = 420) -> go
         plot_bgcolor=PALETTE['card'],
         margin=dict(l=60, r=30, t=50 if title else 30, b=50),
         font=dict(family='Inter, system-ui, sans-serif', color=PALETTE['ink'], size=12),
-        title=dict(text=title, font=dict(size=15, color=PALETTE['ink'])) if title else None,
+        title=dict(text=title or '', font=dict(size=15, color=PALETTE['ink']), subtitle=dict(text='')),
         xaxis=dict(showgrid=True, gridcolor='#EFEAE0'),
         yaxis=dict(showgrid=True, gridcolor='#EFEAE0'),
         legend=dict(bgcolor='rgba(255,255,255,0.85)', bordercolor=PALETTE['card_edge'],
