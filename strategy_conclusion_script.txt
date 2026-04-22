@@ -1,0 +1,104 @@
+STRATEGY & CONCLUSION — PRESENTATION SCRIPT
+(approx. 4 minutes at a normal speaking pace)
+
+------------------------------------------------------------
+PART 1 — THE STRATEGY  (~1 min 45 sec)
+------------------------------------------------------------
+
+So here is the actual trading strategy, and I'll keep this in
+plain terms.
+
+The "label" our model is trying to predict is something called the
+Variance Risk Premium, or VRP. Think of it as a residual: it is
+the difference between how much the stock actually moves tomorrow
+and how much the options market today is *implying* it will move.
+If our model says that gap is going to be positive, the market is
+under-pricing volatility, and the right move is to *buy* a
+straddle — that is the option contract that pays off whenever the
+stock moves a lot in either direction. If our model says the gap
+will be negative, we *sell* the straddle, because the market is
+over-paying for movement that won't happen.
+
+To avoid trading on noise, we only take the trade when the
+predicted VRP is large enough — specifically, when it crosses a
+threshold. And here is the part I want to emphasize for a CS
+audience: that threshold is not hand-picked. It is chosen by a
+nested walk-forward search — basically a rolling cross-validation
+where we re-fit on an expanding training window, pick the
+threshold that maximized the Sharpe ratio in-sample, and then
+apply it forward to genuinely unseen data. So nothing in our
+reported results has peeked at the test set.
+
+On the Strategy page you'll see the JETS cumulative P&L curve
+climbing steadily through the entire out-of-sample window —
+that's this rule firing day after day on data the model never
+saw during training.
+
+------------------------------------------------------------
+PART 2 — THE CONCLUSION  (~2 min 15 sec)
+------------------------------------------------------------
+
+So, did our hypotheses hold up?
+
+Recall we made three claims on top of the HAR baseline. First,
+that implied volatility — the option market's forward view —
+would add predictive power. Second, that oil volatility would
+leak into airline vol through the jet-fuel cost channel. And
+third, our central claim, that the Texas Oil Stock Index — oil-
+sector equity sentiment — would add signal beyond what those
+price-based features already capture.
+
+Here is the scorecard. **IV: partially supported.** **OVX:
+not supported.** **TOSI: weakly supported.** Before I unpack
+each one, a quick note on *why we ran four model families* —
+OLS, Ridge, Random Forest, and XGBoost — instead of just picking
+one. Honestly, we didn't know in advance which would win, and
+the comparison itself turned out to be a finding. **Linear OLS
+beats every more flexible model on average RMSE for the macro-
+feature specifications.** The only place a tree model wins is
+LUV under bare HAR-RV, where Random Forest captures a non-linear
+interaction between the daily, weekly, and monthly RV components.
+The takeaway for an ML audience: in this domain, *feature
+engineering beat model complexity.* The signal is essentially
+linear once you have the right inputs.
+
+That also explains why the HAR baseline itself is so hard to
+beat. Our full model improves root mean squared error by less
+than one percent. Volatility is mostly its own autocorrelated
+past, and any extra feature has to fight for marginal lift.
+
+On implied volatility: it carries real forward-looking
+information, but only crosses statistical significance for the
+JETS ETF, where the Diebold-Mariano test gives a p-value around
+0.001. For the individual airlines the lift is directionally
+positive but doesn't clear the bar. The forward-looking-options
+story holds, but only at the sector-aggregate level.
+
+On oil volatility: the jet-fuel cost story does *not* hold in the
+forecasting sense. OVX co-moves with airline vol contemporaneously
+— you can see it in the correlation heatmap — but it does not
+*lead* next-day RV once HAR already knows recent realized vol.
+
+And on TOSI, our central hypothesis, the verdict is genuinely
+mixed. *No* ticker shows TOSI as statistically significant — the
+best p-value is about 0.10, which in ML terms is "interesting but
+not conclusive." However — and this matters — the full
+specification *including* TOSI produces the lowest average RMSE
+of any combination we tried, and it is selected as the per-ticker
+best model for three of our four names. So TOSI is not a silver
+bullet, but it is a useful weak signal in an ensemble.
+
+Where this all becomes economically real is JETS. Our full-spec
+OLS strategy on JETS achieves an out-of-sample Sharpe ratio of
+about 2.7 on threshold-filtered straddles. For context, a Sharpe
+above 2 is the kind of number hedge funds build entire desks
+around. So even though the statistical lift is small, the
+economic lift, when amplified through a disciplined trading rule,
+is genuinely tradeable.
+
+Our overall takeaway: simple models win most of the time,
+forward-looking option prices add real but ticker-specific value,
+and a noisy sentiment feature like TOSI is worth keeping in the
+ensemble even when it can't win on its own.
+
+Thank you.

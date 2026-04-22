@@ -28,6 +28,271 @@ st.set_page_config(
 )
 
 
+# ---------------- Theme constants ----------------
+
+PALETTE = {
+    'ink':        '#1B2733',
+    'ink_soft':   '#3A4A5C',
+    'paper':      '#FBF9F4',
+    'paper_alt':  '#F2EDE2',
+    'card':       '#FFFFFF',
+    'card_edge':  '#E5DFD0',
+    'accent':     '#3C91E6',
+    'accent_dk':  '#1F6FBF',
+    'mute':       '#6B7785',
+    'good':       '#0B6E4F',
+    'warn':       '#D97706',
+    'bad':        '#C75146',
+}
+
+
+# ---------------- CSS injection ----------------
+
+def inject_css():
+    st.markdown(
+        f"""
+        <style>
+        /* ---------- Layout ---------- */
+        .block-container {{
+            padding-top: 1.4rem;
+            padding-bottom: 3rem;
+            max-width: 1280px;
+        }}
+        section.main > div {{ padding-top: 0; }}
+
+        /* ---------- Headings ---------- */
+        h1 {{
+            color: {PALETTE['ink']};
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            border-bottom: 3px solid {PALETTE['accent']};
+            padding-bottom: 0.45rem;
+            margin-bottom: 0.4rem !important;
+        }}
+        h2 {{
+            color: {PALETTE['ink']};
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-top: 2.2rem !important;
+            border-left: 4px solid {PALETTE['accent']};
+            padding-left: 0.75rem;
+        }}
+        h3 {{
+            color: {PALETTE['ink']};
+            font-weight: 600;
+            margin-top: 1.6rem !important;
+        }}
+        [data-testid="stCaptionContainer"], .stCaption {{
+            color: {PALETTE['mute']};
+        }}
+
+        /* ---------- Metric cards ---------- */
+        [data-testid="stMetric"] {{
+            background: {PALETTE['card']};
+            border: 1px solid {PALETTE['card_edge']};
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            box-shadow: 0 1px 3px rgba(27, 39, 51, 0.04);
+        }}
+        [data-testid="stMetricLabel"] {{
+            color: {PALETTE['mute']} !important;
+            font-size: 0.78rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }}
+        [data-testid="stMetricValue"] {{
+            color: {PALETTE['ink']} !important;
+            font-weight: 700;
+        }}
+
+        /* ---------- Sidebar ---------- */
+        [data-testid="stSidebar"] {{
+            background: linear-gradient(180deg, #1B2733 0%, #2D3F50 100%);
+        }}
+        [data-testid="stSidebar"] * {{
+            color: #E8EEF4 !important;
+        }}
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3 {{
+            color: #FFFFFF !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 0 0.25rem 0 !important;
+            letter-spacing: -0.01em;
+        }}
+        [data-testid="stSidebar"] hr {{
+            border-color: rgba(255,255,255,0.12);
+            margin: 1.1rem 0;
+        }}
+        /* Rectangular tab-style nav (radio group) */
+        [data-testid="stSidebar"] [role="radiogroup"] {{
+            gap: 0.3rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }}
+        [data-testid="stSidebar"] [role="radiogroup"] label {{
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            padding: 0.7rem 0.95rem !important;
+            margin: 0 !important;
+            min-height: 2.6rem;
+            display: flex !important;
+            align-items: center;
+            width: 100% !important;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+            cursor: pointer;
+            position: relative;
+        }}
+        /* Hide the radio circle entirely — every visual variant Streamlit uses */
+        [data-testid="stSidebar"] [role="radiogroup"] label > div:first-child,
+        [data-testid="stSidebar"] [role="radiogroup"] label [data-baseweb="radio"],
+        [data-testid="stSidebar"] [role="radiogroup"] label svg,
+        [data-testid="stSidebar"] [role="radiogroup"] label input[type="radio"] {{
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            opacity: 0 !important;
+        }}
+        /* Label text — use full width, slightly larger */
+        [data-testid="stSidebar"] [role="radiogroup"] label p,
+        [data-testid="stSidebar"] [role="radiogroup"] label > div:last-child {{
+            font-size: 0.95rem !important;
+            font-weight: 500 !important;
+            color: #E8EEF4 !important;
+            margin: 0 !important;
+            width: 100%;
+        }}
+        /* Hover state — whole rectangle subtly lifts */
+        [data-testid="stSidebar"] [role="radiogroup"] label:hover {{
+            background: rgba(60, 145, 230, 0.12);
+            border-color: rgba(60, 145, 230, 0.35);
+            transform: translateX(2px);
+        }}
+        /* Selected state — whole rectangle highlighted with strong accent */
+        [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {{
+            background: linear-gradient(90deg, rgba(60,145,230,0.32) 0%, rgba(60,145,230,0.10) 100%) !important;
+            border-color: rgba(60, 145, 230, 0.5) !important;
+            border-left: 3px solid {PALETTE['accent']} !important;
+            box-shadow: 0 1px 6px rgba(60, 145, 230, 0.25);
+        }}
+        [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p,
+        [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) > div:last-child {{
+            color: #FFFFFF !important;
+            font-weight: 600 !important;
+        }}
+        /* Fallback for browsers without :has() — older state attribute */
+        [data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] {{
+            background: linear-gradient(90deg, rgba(60,145,230,0.32) 0%, rgba(60,145,230,0.10) 100%) !important;
+            border-color: rgba(60, 145, 230, 0.5) !important;
+            border-left: 3px solid {PALETTE['accent']} !important;
+        }}
+
+        /* ---------- Tabs ---------- */
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 4px;
+            border-bottom: 1px solid {PALETTE['card_edge']};
+        }}
+        .stTabs [data-baseweb="tab"] {{
+            background: transparent;
+            border-radius: 8px 8px 0 0;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }}
+        .stTabs [aria-selected="true"] {{
+            background: {PALETTE['card']} !important;
+            color: {PALETTE['accent_dk']} !important;
+        }}
+
+        /* ---------- Tables ---------- */
+        [data-testid="stDataFrame"] {{
+            border: 1px solid {PALETTE['card_edge']};
+            border-radius: 10px;
+            overflow: hidden;
+        }}
+
+        /* ---------- Misc ---------- */
+        footer {{ visibility: hidden; }}
+        [data-testid="stHeader"] {{ background: transparent; }}
+        .stAlert {{ border-radius: 10px; }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ---------------- Card helpers ----------------
+
+def hypothesis_card(title: str, verdict: str, tone: str, body: str):
+    """Renders a colored verdict card via raw HTML."""
+    tone_map = {
+        'good': (PALETTE['good'], '#E8F4EF'),
+        'warn': (PALETTE['warn'], '#FDF4E5'),
+        'bad':  (PALETTE['bad'],  '#FAECEA'),
+    }
+    border, bg = tone_map.get(tone, (PALETTE['mute'], '#EFEFEF'))
+    return f"""
+    <div style="background:{bg}; border-left:5px solid {border};
+                border-radius:10px; padding:0.9rem 1.1rem; margin-bottom:0.6rem;
+                height:100%;">
+      <div style="font-size:0.72rem; letter-spacing:0.08em; color:{border};
+                  font-weight:700; text-transform:uppercase;">{verdict}</div>
+      <div style="font-size:1.05rem; font-weight:700; color:{PALETTE['ink']};
+                  margin:0.15rem 0 0.4rem 0;">{title}</div>
+      <div style="font-size:0.88rem; color:{PALETTE['ink_soft']}; line-height:1.45;">
+        {body}
+      </div>
+    </div>
+    """
+
+
+def stat_card(label: str, value: str, sub: str = '', accent: str | None = None):
+    accent = accent or PALETTE['accent']
+    return f"""
+    <div style="background:{PALETTE['card']}; border:1px solid {PALETTE['card_edge']};
+                border-top:3px solid {accent}; border-radius:10px;
+                padding:0.85rem 1rem; height:100%;">
+      <div style="font-size:0.72rem; letter-spacing:0.06em; color:{PALETTE['mute']};
+                  text-transform:uppercase;">{label}</div>
+      <div style="font-size:1.55rem; font-weight:700; color:{PALETTE['ink']};
+                  margin:0.15rem 0 0.1rem 0;">{value}</div>
+      <div style="font-size:0.8rem; color:{PALETTE['mute']};">{sub}</div>
+    </div>
+    """
+
+
+def section_intro(text: str):
+    st.markdown(
+        f"""<div style="color:{PALETTE['ink_soft']}; font-size:0.98rem;
+                       line-height:1.55; margin:0.4rem 0 1.1rem 0;">{text}</div>""",
+        unsafe_allow_html=True,
+    )
+
+
+# ---------------- Plotly defaults ----------------
+
+def style_fig(fig: go.Figure, title: str | None = None, height: int = 420) -> go.Figure:
+    fig.update_layout(
+        height=height,
+        template='plotly_white',
+        paper_bgcolor=PALETTE['paper'],
+        plot_bgcolor=PALETTE['card'],
+        margin=dict(l=60, r=30, t=50 if title else 30, b=50),
+        font=dict(family='Inter, system-ui, sans-serif', color=PALETTE['ink'], size=12),
+        title=dict(text=title, font=dict(size=15, color=PALETTE['ink'])) if title else None,
+        xaxis=dict(showgrid=True, gridcolor='#EFEAE0'),
+        yaxis=dict(showgrid=True, gridcolor='#EFEAE0'),
+        legend=dict(bgcolor='rgba(255,255,255,0.85)', bordercolor=PALETTE['card_edge'],
+                    borderwidth=1, font=dict(size=11)),
+        hoverlabel=dict(bgcolor=PALETTE['ink'], font_color='white', font_size=11),
+    )
+    return fig
+
+
 # ---------------- Artifact loading ----------------
 
 @st.cache_data(show_spinner=False)
@@ -48,7 +313,13 @@ def load_meta() -> dict:
 
 @st.cache_data(show_spinner=False)
 def load_figure(name: str) -> go.Figure:
-    return pio.from_json((FIGURES / f'{name}.json').read_text(encoding='utf-8'))
+    fig = pio.from_json((FIGURES / f'{name}.json').read_text(encoding='utf-8'))
+    fig.update_layout(
+        paper_bgcolor=PALETTE['paper'],
+        plot_bgcolor=PALETTE['card'],
+        font=dict(family='Inter, system-ui, sans-serif', color=PALETTE['ink']),
+    )
+    return fig
 
 
 def artifacts_ready() -> bool:
@@ -56,7 +327,7 @@ def artifacts_ready() -> bool:
     return all((PROCESSED / r).exists() for r in required) and FIGURES.exists()
 
 
-# ---------------- Shared styling ----------------
+# ---------------- Shared helpers ----------------
 
 def render_metric_row(metrics: list[tuple[str, str, str | None]]):
     cols = st.columns(len(metrics))
@@ -72,12 +343,12 @@ def format_num(x, digits=3):
     return '—' if pd.isna(x) else f'{x:,.{digits}f}'
 
 
-# ---------------- Pages ----------------
-
 def _short_month_year(date_str: str) -> str:
     ts = pd.to_datetime(date_str)
     return ts.strftime('%b %Y')
 
+
+# ---------------- Pages ----------------
 
 def page_hypothesis(meta):
     st.title('Forecasting Airline Realized Volatility')
@@ -186,7 +457,6 @@ def page_data(meta):
 def page_models(meta):
     st.title('Models')
     feature_specs = load_table('feature_specs')
-    feature_map = load_table('feature_map')
 
     st.markdown(
         """
@@ -237,14 +507,11 @@ def page_models(meta):
     else:
         fig = go.Figure(go.Bar(
             x=view['Importance'], y=view['Feature'],
-            orientation='h', marker_color=meta['model_colors'].get(family, '#3C91E6'),
+            orientation='h', marker_color=meta['model_colors'].get(family, PALETTE['accent']),
         ))
-        fig.update_layout(
-            height=520, margin=dict(l=160, r=30, t=40, b=30),
-            template='plotly_white', paper_bgcolor='#F7F4ED', plot_bgcolor='#FFFFFF',
-            title=f'{ticker} — {family} feature importance',
-            xaxis_title='Importance', yaxis_title='Feature',
-        )
+        style_fig(fig, title=f'{ticker} — {family} feature importance', height=520)
+        fig.update_layout(margin=dict(l=160, r=30, t=50, b=30),
+                          xaxis_title='Importance', yaxis_title='Feature')
         st.plotly_chart(fig, use_container_width=True)
 
 
@@ -287,10 +554,8 @@ def page_results(meta):
         hovertemplate='Spec=%{y}<br>Family=%{x}<br>Avg RMSE=%{z:.4f}<extra></extra>',
         colorbar=dict(title='Avg RMSE'),
     ))
-    fig.update_layout(
-        height=460, template='plotly_white', paper_bgcolor='#F7F4ED',
-        margin=dict(l=180, r=40, t=40, b=40),
-    )
+    style_fig(fig, height=460)
+    fig.update_layout(margin=dict(l=180, r=40, t=40, b=40))
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader('OLS Sharpe by feature spec — per ticker')
@@ -343,20 +608,17 @@ def page_results(meta):
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=view['trade_date'], y=view['vrp_actual'], mode='lines',
-            name='Actual VRP', line=dict(color='#24323D', width=1.6),
+            name='Actual VRP', line=dict(color=PALETTE['ink'], width=1.6),
         ))
         fig.add_trace(go.Scatter(
             x=view['trade_date'], y=view['y_pred_vrp'], mode='lines',
             name='Predicted VRP',
-            line=dict(color=meta['airline_colors'].get(sel_t, '#3C91E6'), width=2.0),
+            line=dict(color=meta['airline_colors'].get(sel_t, PALETTE['accent']), width=2.0),
         ))
-        fig.update_layout(
-            height=460, template='plotly_white', paper_bgcolor='#F7F4ED',
-            title=f'{sel_t} — {sel_f} | {sel_s}',
-            xaxis_title='Date', yaxis_title='VRP (log-variance)',
-            hovermode='x unified',
-            legend=dict(orientation='h', y=-0.15, x=0.5, xanchor='center'),
-        )
+        style_fig(fig, title=f'{sel_t} — {sel_f} | {sel_s}', height=460)
+        fig.update_layout(xaxis_title='Date', yaxis_title='VRP (log-variance)',
+                          hovermode='x unified',
+                          legend=dict(orientation='h', y=-0.15, x=0.5, xanchor='center'))
         st.plotly_chart(fig, use_container_width=True)
 
         r = results[
@@ -372,56 +634,176 @@ def page_results(meta):
             ])
 
 
+# ---------------- Strategy page ----------------
+
+def _build_pnl(view: pd.DataFrame, sqrt2pi: float) -> pd.DataFrame:
+    out = view.sort_values('trade_date').copy()
+    out['pnl_daily'] = out['signal'] * (out['abs_daily_return_tplus1'] - sqrt2pi * out['iv_daily_vol'])
+    out['cum_pnl'] = out['pnl_daily'].cumsum()
+    return out
+
+
 def page_strategy(meta):
     st.title('Strategy')
-    st.markdown(
-        """
-        For each day in the OOS window the model predicts VRP.  If |predicted VRP|
-        exceeds the per-fold threshold, we **take a position in the ATM straddle**:
-        long when predicted VRP > 0 (expected realized > implied), short otherwise.
+    st.caption('From a one-number forecast to an out-of-sample equity curve.')
 
-        **P&L per day** = `signal × (|close-to-close return| − √(2/π) × σ_IV)`
-        """
-    )
+    sqrt2pi = float(meta['sqrt2_pi'])
+    preds = load_table('predictions').copy()
+    preds['trade_date'] = pd.to_datetime(preds['trade_date'])
+    results = load_table('results')
 
-    st.subheader('JETS cumulative straddle P&L')
+    # ------------- Three-step explanation -------------
+    st.markdown('## How the strategy works')
+    c1, c2, c3 = st.columns(3)
+    steps = [
+        ('1 · Forecast',
+         'Predict tomorrow\'s VRP — the gap between realized and implied volatility — '
+         'from HAR-RV, IV, OVX and TOSI features.'),
+        ('2 · Filter',
+         'Trade only when |predicted VRP| exceeds a per-fold threshold chosen by '
+         'nested walk-forward Sharpe.  No data peeking.'),
+        ('3 · Trade',
+         'Long the ATM straddle if predicted VRP > 0, short otherwise.  '
+         'P&L = signal × (|close-to-close return| − √(2/π)·σ IV).'),
+    ]
+    for col, (title, body) in zip([c1, c2, c3], steps):
+        col.markdown(
+            f"""<div style="background:{PALETTE['card']}; border:1px solid {PALETTE['card_edge']};
+                          border-top:3px solid {PALETTE['accent']}; border-radius:10px;
+                          padding:1rem 1.1rem; height:100%;">
+                  <div style="font-size:0.78rem; color:{PALETTE['accent_dk']};
+                              font-weight:700; letter-spacing:0.05em;">{title}</div>
+                  <div style="margin-top:0.4rem; color:{PALETTE['ink_soft']};
+                              line-height:1.5; font-size:0.9rem;">{body}</div>
+                </div>""",
+            unsafe_allow_html=True,
+        )
+
+    # ------------- Headline strategy stats (JETS, full spec, OLS) -------------
+    st.markdown('## Headline — JETS, full spec, OLS')
+    headline = results[
+        (results['Ticker'] == 'JETS')
+        & (results['Feature_Spec'] == 'HAR-RV+IV+OVX+TOSI')
+        & (results['Model_Family'] == 'OLS')
+    ]
+    if not headline.empty:
+        h = headline.iloc[0]
+        cols = st.columns(4)
+        cards = [
+            ('Sharpe (OOS)', format_num(h['Sharpe_Straddle'], 2),
+             'Annualised straddle Sharpe', PALETTE['good']),
+            ('Mean daily P&L', format_num(h['Mean_Straddle_PnL'], 5),
+             'Log-return units, per active day', PALETTE['accent']),
+            ('Hit rate (traded)', format_pct(h['Signal_Hit_Rate']),
+             '% of taken trades with P&L > 0', PALETTE['warn']),
+            ('Days traded', format_pct(h['Pct_Days_Traded']),
+             'Threshold-filtered fraction of OOS days', PALETTE['ink_soft']),
+        ]
+        for col, (lbl, val, sub, accent) in zip(cols, cards):
+            col.markdown(stat_card(lbl, val, sub, accent), unsafe_allow_html=True)
+
+    st.markdown('### JETS cumulative straddle P&L')
     st.plotly_chart(load_figure('jets_pnl'), use_container_width=True)
 
-    preds = load_table('predictions').copy()
-    results = load_table('results')
-    preds['trade_date'] = pd.to_datetime(preds['trade_date'])
-    sqrt2pi = float(meta['sqrt2_pi'])
+    # ------------- HAR baseline vs full spec equity curves -------------
+    st.markdown('## Does the macro layer pay off?')
+    section_intro(
+        'The full feature set adds IV, OVX and TOSI on top of pure HAR-RV.  '
+        'Below we trade the same rule with each spec and compare cumulative P&L — '
+        'this is how the &lt;1% RMSE difference compounds into Sharpe.'
+    )
 
-    st.subheader('Build your own strategy — any ticker × spec × family')
+    compare_ticker = st.selectbox(
+        'Compare on ticker', meta['tickers'],
+        index=meta['tickers'].index('JETS'), key='compare_ticker',
+    )
+
+    base = preds[(preds['Ticker'] == compare_ticker)
+                 & (preds['Feature_Spec'] == 'HAR-RV')
+                 & (preds['Model_Family'] == 'OLS')]
+    full = preds[(preds['Ticker'] == compare_ticker)
+                 & (preds['Feature_Spec'] == 'HAR-RV+IV+OVX+TOSI')
+                 & (preds['Model_Family'] == 'OLS')]
+
+    if base.empty or full.empty or 'iv_daily_vol' not in base.columns:
+        st.info('Comparison data unavailable for this ticker.')
+    else:
+        base_p = _build_pnl(base, sqrt2pi)
+        full_p = _build_pnl(full, sqrt2pi)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=base_p['trade_date'], y=base_p['cum_pnl'],
+            mode='lines', name='HAR-RV (baseline)',
+            line=dict(color=PALETTE['mute'], width=2, dash='dash'),
+        ))
+        fig.add_trace(go.Scatter(
+            x=full_p['trade_date'], y=full_p['cum_pnl'],
+            mode='lines', name='HAR-RV + IV + OVX + TOSI',
+            line=dict(color=meta['airline_colors'].get(compare_ticker, PALETTE['accent']), width=2.6),
+        ))
+        fig.add_hline(y=0, line_dash='dot', line_color=PALETTE['mute'])
+        style_fig(fig, title=f'{compare_ticker} — cumulative straddle P&L (OLS)', height=420)
+        fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative P&L',
+                          hovermode='x unified',
+                          legend=dict(orientation='h', y=-0.18, x=0.5, xanchor='center'))
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ------------- Sharpe-by-ticker bar (best model per ticker) -------------
+    st.markdown('## Where the strategy works — Sharpe by ticker (best model)')
+    best = load_table('best_models').copy()
+    best = best.sort_values('Sharpe_Straddle', ascending=True)
+    sharpe_fig = go.Figure(go.Bar(
+        x=best['Sharpe_Straddle'],
+        y=best['Ticker'],
+        orientation='h',
+        marker=dict(
+            color=[meta['airline_colors'].get(t, PALETTE['accent']) for t in best['Ticker']],
+            line=dict(color=PALETTE['ink'], width=0.5),
+        ),
+        text=[f"{s:.2f}" for s in best['Sharpe_Straddle']],
+        textposition='outside',
+        hovertemplate='<b>%{y}</b><br>Best model: %{customdata}<br>Sharpe: %{x:.2f}<extra></extra>',
+        customdata=best['Model'],
+    ))
+    sharpe_fig.add_vline(x=1.0, line_dash='dot', line_color=PALETTE['mute'],
+                         annotation_text='Sharpe = 1', annotation_position='top right')
+    style_fig(sharpe_fig, height=320)
+    sharpe_fig.update_layout(xaxis_title='Out-of-sample Sharpe', yaxis_title='',
+                             margin=dict(l=80, r=80, t=20, b=40))
+    st.plotly_chart(sharpe_fig, use_container_width=True)
+
+    # ------------- Sandbox -------------
+    st.markdown('## Build your own — sandbox')
+    section_intro(
+        'Pick any ticker × feature spec × model family.  '
+        'P&L is recomputed from the stored OOS predictions and the ATM straddle premium.'
+    )
     c1, c2, c3 = st.columns(3)
     sel_t = c1.selectbox('Ticker', meta['tickers'], key='strat_t')
-    sel_s = c2.selectbox('Feature spec', list(meta['feature_specs'].keys()),
-                         index=list(meta['feature_specs'].keys()).index('HAR-RV+IV+OVX+TOSI'), key='strat_s')
+    sel_s = c2.selectbox(
+        'Feature spec', list(meta['feature_specs'].keys()),
+        index=list(meta['feature_specs'].keys()).index('HAR-RV+IV+OVX+TOSI'), key='strat_s',
+    )
     sel_f = c3.selectbox('Model family', meta['model_families'], key='strat_f')
 
     view = preds[
         (preds['Ticker'] == sel_t) & (preds['Feature_Spec'] == sel_s) & (preds['Model_Family'] == sel_f)
-    ].sort_values('trade_date').copy()
+    ]
     if view.empty or 'iv_daily_vol' not in view.columns:
         st.info('No predictions for this combination.')
         return
-
-    view['pnl_daily'] = view['signal'] * (view['abs_daily_return_tplus1'] - sqrt2pi * view['iv_daily_vol'])
-    view['cum_pnl'] = view['pnl_daily'].cumsum()
+    sandbox = _build_pnl(view, sqrt2pi)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=view['trade_date'], y=view['cum_pnl'],
+        x=sandbox['trade_date'], y=sandbox['cum_pnl'],
         mode='lines', name='Cumulative P&L',
-        line=dict(color=meta['airline_colors'].get(sel_t, '#3C91E6'), width=2.2),
+        line=dict(color=meta['airline_colors'].get(sel_t, PALETTE['accent']), width=2.4),
     ))
-    fig.add_hline(y=0, line_dash='dot', line_color='#7F8C8D')
-    fig.update_layout(
-        height=440, template='plotly_white', paper_bgcolor='#F7F4ED',
-        title=f'{sel_t} — {sel_f} | {sel_s} cumulative straddle P&L',
-        xaxis_title='Date', yaxis_title='Cumulative P&L (log-return units)',
-        hovermode='x unified',
-    )
+    fig.add_hline(y=0, line_dash='dot', line_color=PALETTE['mute'])
+    style_fig(fig, title=f'{sel_t} — {sel_f} | {sel_s}', height=400)
+    fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative P&L',
+                      hovermode='x unified')
     st.plotly_chart(fig, use_container_width=True)
 
     r = results[
@@ -436,20 +818,24 @@ def page_strategy(meta):
             ('Days traded', format_pct(row['Pct_Days_Traded']), None),
         ])
 
-    st.subheader('Per-fold threshold behavior')
-    thresh = load_table('threshold_summary')
-    st.dataframe(
-        thresh[(thresh['Ticker'] == sel_t) & (thresh['Feature_Spec'] == sel_s) & (thresh['Model_Family'] == sel_f)],
-        use_container_width=True, hide_index=True,
-    )
+    with st.expander('Per-fold threshold behavior'):
+        thresh = load_table('threshold_summary')
+        st.dataframe(
+            thresh[(thresh['Ticker'] == sel_t) & (thresh['Feature_Spec'] == sel_s) & (thresh['Model_Family'] == sel_f)],
+            use_container_width=True, hide_index=True,
+        )
 
+
+# ---------------- Conclusion page ----------------
 
 def page_conclusion(meta):
     st.title('Conclusion')
+    st.caption('Did the hypotheses hold up? — and what did the model comparison teach us?')
 
     dm = load_table('dm_results')
     best = load_table('best_models')
     summary = load_table('summary')
+    results = load_table('results')
 
     best_ols_full = summary[
         (summary['Feature_Spec'] == 'HAR-RV+IV+OVX+TOSI') & (summary['Model_Family'] == 'OLS')
@@ -458,119 +844,270 @@ def page_conclusion(meta):
         (summary['Feature_Spec'] == 'HAR-RV') & (summary['Model_Family'] == 'OLS')
     ].iloc[0]
 
-    render_metric_row([
+    # ------------- Headline metric cards -------------
+    rmse_lift = (1 - best_ols_full['Avg_RMSE'] / base_ols['Avg_RMSE']) * 100
+    best_idx = best['Sharpe_Straddle'].idxmax()
+    st.markdown('## Headline numbers')
+    cols = st.columns(4)
+    cards = [
         ('Best avg RMSE', format_num(best_ols_full['Avg_RMSE'], 4),
-         'Full spec, OLS — lowest of 24 spec×family combos'),
-        ('Baseline HAR-RV RMSE', format_num(base_ols['Avg_RMSE'], 4), 'OLS only'),
-        ('Best ticker Sharpe',
-         format_num(best['Sharpe_Straddle'].max(), 2),
-         f"{best.loc[best['Sharpe_Straddle'].idxmax(), 'Ticker']} — "
-         f"{best.loc[best['Sharpe_Straddle'].idxmax(), 'Model']}"),
-        ('Avg directional acc',
-         format_pct(summary['Avg_Directional_Acc'].mean()),
-         'Sign-of-VRP correct'),
-    ])
+         'Full spec, OLS — lowest of 24 combos', PALETTE['good']),
+        ('Baseline HAR-RV RMSE', format_num(base_ols['Avg_RMSE'], 4),
+         f'Lift from full spec: {rmse_lift:+.2f}%', PALETTE['ink_soft']),
+        ('Best ticker Sharpe', format_num(best['Sharpe_Straddle'].max(), 2),
+         f"{best.loc[best_idx, 'Ticker']} — {best.loc[best_idx, 'Model']}", PALETTE['accent']),
+        ('Avg directional acc', format_pct(summary['Avg_Directional_Acc'].mean()),
+         'Sign-of-VRP correct', PALETTE['warn']),
+    ]
+    for col, (lbl, val, sub, accent) in zip(cols, cards):
+        col.markdown(stat_card(lbl, val, sub, accent), unsafe_allow_html=True)
 
-    st.markdown('## Headline')
-    st.markdown(
-        """
-        The HAR baseline is hard to beat.  Across 4 tickers × 6 specifications × 4 model
-        families, the best-average-RMSE spec (**HAR-RV+IV+OVX+TOSI, OLS**) improves on
-        the plain HAR-RV baseline by less than **1% in RMSE** — a marginal statistical
-        lift, but one that compounds into real economic difference via the threshold-
-        selected straddle trade for certain tickers.
-        """
-    )
-
+    # ------------- Hypothesis scorecard as visual cards -------------
     st.markdown('## Hypothesis scorecard')
+    section_intro(
+        'Each card shows whether the Diebold-Mariano test rejects equality '
+        'between the spec and its lower-feature counterpart at the 5% level, '
+        'and how to interpret the verdict.'
+    )
 
-    def _verdict_row(hypothesis_label, friendly):
+    def _verdict(hypothesis_label):
         rows = dm[dm['Hypothesis'] == hypothesis_label]
-        sig_tickers = rows[rows['Significant_5pct']]['Ticker'].tolist()
-        min_p = rows['P_Value'].min()
-        return {
-            'Hypothesis': friendly,
-            'Significant (p<0.05)': ', '.join(sig_tickers) if sig_tickers else 'None',
-            'Best p-value': f"{min_p:.4f}",
-            'Verdict': '✅ Supported' if sig_tickers else '❌ Not supported',
-        }
+        sig = rows[rows['Significant_5pct']]['Ticker'].tolist()
+        return sig, rows['P_Value'].min() if not rows.empty else float('nan')
 
-    scorecard = pd.DataFrame([
-        _verdict_row('IV adds to HAR-RV?',          'IV improves HAR-RV'),
-        _verdict_row('OVX adds to HAR-RV?',         'OVX improves HAR-RV'),
-        _verdict_row('OVX adds to HAR-RV+IV?',      'OVX improves HAR-RV+IV'),
-        _verdict_row('TOSI adds to HAR-RV+OVX?',    'TOSI improves HAR-RV+OVX'),
-        _verdict_row('TOSI adds to HAR-RV+IV+OVX?', 'TOSI improves HAR-RV+IV+OVX'),
-        _verdict_row('IV adds to HAR-RV+OVX?',      'IV improves HAR-RV+OVX'),
-    ])
-    st.dataframe(scorecard, use_container_width=True, hide_index=True)
+    iv_sig, iv_p = _verdict('IV adds to HAR-RV?')
+    ovx_sig, ovx_p = _verdict('OVX adds to HAR-RV?')
+    tosi_sig, tosi_p = _verdict('TOSI adds to HAR-RV+IV+OVX?')
 
-    st.markdown('## What we learned')
-    st.markdown(
-        """
-        **1. HAR captures most of the signal.**  Volatility is highly persistent — daily,
-        weekly, and monthly RV components already explain ~5–6% of next-day log-variance
-        and achieve ~76% directional accuracy on the VRP target.  Any extra feature
-        has to beat a very strong baseline.
-
-        **2. IV has genuine forward-looking content — but only visibly in JETS.**
-        JETS is the only ticker where the Diebold-Mariano test rejects "HAR-RV equals
-        HAR-RV+IV" at the 5% level (p = 0.0014, DM stat = +3.19).  The ETF aggregates
-        airline-specific noise, and the option market's forward view appears to price
-        the sector-wide component that single-name HAR misses.  For the individual
-        airlines (DAL, UAL, LUV) the IV lift is directionally positive for DAL and UAL
-        but doesn't cross the 5% bar.
-
-        **3. OVX alone adds nothing.**  Every DM test for "OVX adds to HAR-RV" has a
-        negative stat and large p-value.  Oil vol co-moves with airline vol
-        contemporaneously (the correlation heatmap shows that) but it does not
-        *lead* next-day RV once HAR already knows recent RV history.
-        """
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(
+        hypothesis_card(
+            'IV → HAR-RV',
+            'Partially supported',
+            'warn',
+            f"Significant for <b>{', '.join(iv_sig) if iv_sig else 'no ticker'}</b> "
+            f"(best p = {iv_p:.4f}). Forward-looking option content shows up at the "
+            f"sector-aggregate level (JETS), but not for individual airlines."
+        ),
+        unsafe_allow_html=True,
+    )
+    c2.markdown(
+        hypothesis_card(
+            'OVX → HAR-RV',
+            'Not supported',
+            'bad',
+            f"No ticker reaches significance (best p = {ovx_p:.4f}). "
+            f"Oil vol co-moves with airline RV contemporaneously but does not "
+            f"<i>lead</i> next-day RV once HAR knows recent history."
+        ),
+        unsafe_allow_html=True,
+    )
+    c3.markdown(
+        hypothesis_card(
+            'TOSI → HAR-RV+IV+OVX',
+            'Weakly supported',
+            'warn',
+            f"No DM-significant ticker (best p = {tosi_p:.4f}), but the full spec "
+            f"<b>HAR-RV+IV+OVX+TOSI</b> achieves the lowest avg RMSE and is the per-ticker "
+            f"best for 3 of 4 names. A useful weak auxiliary."
+        ),
+        unsafe_allow_html=True,
     )
 
-    st.markdown('## On the TOSI hypothesis')
-    st.markdown(
-        """
-        We hypothesised that Texas Oil Stock Index sentiment would contain additional
-        signal about airline vol beyond price-based indicators (IV, OVX).  The evidence
-        is **mixed but leans against it**:
-
-        * **No ticker shows a DM-significant TOSI effect.**  Across the two tests
-          ("TOSI adds to HAR-RV+OVX" and "TOSI adds to HAR-RV+IV+OVX"), the smallest
-          p-value is **0.10 (DAL, HAR-RV+OVX branch)** — suggestive but not significant
-          at 5%.  For LUV the test stat is actually *negative*, meaning TOSI hurt.
-        * **However, the full spec HAR-RV+IV+OVX+TOSI does produce the lowest average
-          RMSE** of any spec×family combination (OLS, RMSE 0.7637 vs HAR-RV OLS 0.7684),
-          and is chosen as the *per-ticker best* for 3 of 4 names (DAL, UAL, JETS).
-          So TOSI isn't harmful and the combination of predictors nudges point forecasts
-          forward, even though no single TOSI-increment test rejects equality.
-
-        **Reconciling the two views:**  TOSI's incremental contribution is small enough
-        that the Diebold-Mariano test lacks power to detect it over a ~450-day OOS
-        window, but large enough in direction to improve ensemble fit.  A longer
-        sample — or an event-study conditioning on actual oil-sector stress periods —
-        would be needed to settle the case.  For now we treat TOSI as a **weak
-        auxiliary**: include it, but don't base a trading decision on it alone.
-        """
+    # ------------- Model family comparison (supports new script beat) -------------
+    st.markdown('## On using four model families')
+    section_intro(
+        'We ran <b>OLS, Ridge, Random Forest and XGBoost</b> across every spec.  '
+        'The flat-ish bar chart below is itself a finding: linear OLS matches or beats '
+        'the more flexible families on average RMSE — feature engineering beat model complexity.'
     )
 
+    fam_avg = (
+        results.groupby('Model_Family', as_index=False)['RMSE']
+        .mean()
+        .rename(columns={'RMSE': 'Avg_RMSE'})
+    )
+    fam_avg = fam_avg.set_index('Model_Family').reindex(meta['model_families']).reset_index()
+
+    cA, cB = st.columns([1, 1])
+    with cA:
+        fam_fig = go.Figure(go.Bar(
+            x=fam_avg['Model_Family'],
+            y=fam_avg['Avg_RMSE'],
+            marker=dict(
+                color=[meta['model_colors'].get(f, PALETTE['accent']) for f in fam_avg['Model_Family']],
+                line=dict(color=PALETTE['ink'], width=0.5),
+            ),
+            text=[f"{v:.4f}" for v in fam_avg['Avg_RMSE']],
+            textposition='outside',
+            hovertemplate='<b>%{x}</b><br>Avg RMSE: %{y:.4f}<extra></extra>',
+        ))
+        ymin = float(fam_avg['Avg_RMSE'].min()) * 0.995
+        ymax = float(fam_avg['Avg_RMSE'].max()) * 1.005
+        style_fig(fam_fig, title='Avg RMSE by model family (lower = better)', height=340)
+        fam_fig.update_layout(yaxis=dict(range=[ymin, ymax], gridcolor='#EFEAE0'),
+                              xaxis_title='', yaxis_title='Avg RMSE')
+        st.plotly_chart(fam_fig, use_container_width=True)
+
+    with cB:
+        spec_avg = (
+            results[results['Model_Family'] == 'OLS']
+            .groupby('Feature_Spec', as_index=False)['RMSE'].mean()
+            .rename(columns={'RMSE': 'Avg_RMSE'})
+        )
+        spec_avg = spec_avg.set_index('Feature_Spec').reindex(list(meta['feature_specs'].keys())).reset_index()
+        spec_fig = go.Figure(go.Bar(
+            x=spec_avg['Feature_Spec'].map(meta['spec_short']),
+            y=spec_avg['Avg_RMSE'],
+            marker=dict(
+                color=[meta['spec_colors'].get(s, PALETTE['accent']) for s in spec_avg['Feature_Spec']],
+                line=dict(color=PALETTE['ink'], width=0.5),
+            ),
+            text=[f"{v:.4f}" for v in spec_avg['Avg_RMSE']],
+            textposition='outside',
+            hovertemplate='<b>%{x}</b><br>Avg RMSE: %{y:.4f}<extra></extra>',
+        ))
+        ymin = float(spec_avg['Avg_RMSE'].min()) * 0.995
+        ymax = float(spec_avg['Avg_RMSE'].max()) * 1.005
+        style_fig(spec_fig, title='Avg RMSE by feature spec (OLS)', height=340)
+        spec_fig.update_layout(yaxis=dict(range=[ymin, ymax], gridcolor='#EFEAE0'),
+                               xaxis_title='', yaxis_title='Avg RMSE')
+        st.plotly_chart(spec_fig, use_container_width=True)
+
+    st.markdown(
+        f"""
+        <div style="background:{PALETTE['paper_alt']}; border-left:4px solid {PALETTE['accent']};
+                    padding:0.85rem 1.05rem; border-radius:8px; margin-top:0.4rem;">
+          <b>Reading the chart:</b> the y-axis is zoomed — the spread between best and
+          worst model family is &lt;1% of RMSE. Tree-based models matter for exactly one
+          ticker (LUV under bare HAR-RV); everywhere else, the linear baseline holds up.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # ------------- Best model per ticker as cards -------------
+    st.markdown('## Best model per ticker')
+    cols = st.columns(len(best))
+    for col, (_, row) in zip(cols, best.iterrows()):
+        accent = meta['airline_colors'].get(row['Ticker'], PALETTE['accent'])
+        col.markdown(
+            f"""<div style="background:{PALETTE['card']}; border:1px solid {PALETTE['card_edge']};
+                          border-top:4px solid {accent}; border-radius:10px;
+                          padding:0.85rem 1rem; height:100%;">
+                  <div style="font-size:1.4rem; font-weight:800; color:{accent};">{row['Ticker']}</div>
+                  <div style="font-size:0.78rem; color:{PALETTE['mute']}; text-transform:uppercase;
+                              letter-spacing:0.05em; margin-top:0.15rem;">{row['Model']}</div>
+                  <div style="margin-top:0.55rem; display:flex; gap:0.9rem; flex-wrap:wrap;">
+                    <div><div style="font-size:0.7rem; color:{PALETTE['mute']};">RMSE</div>
+                         <div style="font-weight:700; color:{PALETTE['ink']};">{row['RMSE']:.4f}</div></div>
+                    <div><div style="font-size:0.7rem; color:{PALETTE['mute']};">Sharpe</div>
+                         <div style="font-weight:700; color:{PALETTE['ink']};">{row['Sharpe_Straddle']:.2f}</div></div>
+                    <div><div style="font-size:0.7rem; color:{PALETTE['mute']};">Dir. acc</div>
+                         <div style="font-weight:700; color:{PALETTE['ink']};">{row['Directional_Acc']*100:.1f}%</div></div>
+                  </div>
+                </div>""",
+            unsafe_allow_html=True,
+        )
+
+    # ------------- Trading implications -------------
     st.markdown('## Trading implications')
     st.markdown(
-        """
-        * **JETS straddle edge is real.**  Full-spec OLS yields OOS Sharpe ≈ 2.7 on
-          threshold-filtered ATM straddles — economically meaningful after cost.
-        * **LUV is the outlier.**  Plain HAR-RV + Random Forest wins on LUV; extra
-          macro features degrade performance, consistent with LUV's idiosyncratic
-          route concentration (domestic, narrow-body) differing from sector aggregate.
-        * **Single-name tests are hard.**  Statistical power is limited;
-          ensemble spec + threshold selection is how the marginal signal becomes tradeable.
-        """
+        f"""
+        <ul style="line-height:1.7; color:{PALETTE['ink_soft']};">
+          <li><b>JETS straddle edge is real.</b> Full-spec OLS yields OOS Sharpe ≈ 2.7
+              on threshold-filtered ATM straddles — economically meaningful.</li>
+          <li><b>LUV is the outlier.</b> Plain HAR-RV + Random Forest wins on LUV; extra
+              macro features degrade performance, consistent with LUV's domestic-only,
+              narrow-body route mix.</li>
+          <li><b>Single-name tests are hard.</b> Statistical power is limited; ensemble
+              spec + threshold selection is how the marginal signal becomes tradeable.</li>
+        </ul>
+        """,
+        unsafe_allow_html=True,
     )
 
 
 # ---------------- App shell ----------------
 
+def render_sidebar(meta):
+    sb = st.sidebar
+    sb.markdown(
+        f"""<div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.1rem;">
+              <div style="font-size:1.6rem;">✈️</div>
+              <div>
+                <div style="font-size:1.15rem; font-weight:800; color:white; line-height:1.1;">
+                  Airline Volatility</div>
+                <div style="font-size:0.72rem; color:#A8B5C2; letter-spacing:0.06em;
+                            text-transform:uppercase;">CS 329e · Group 23</div>
+              </div>
+            </div>""",
+        unsafe_allow_html=True,
+    )
+    sb.markdown('<hr/>', unsafe_allow_html=True)
+
+    sb.markdown(
+        '<div style="font-size:0.7rem; letter-spacing:0.08em; color:#A8B5C2; '
+        'text-transform:uppercase; margin-bottom:0.3rem;">Sections</div>',
+        unsafe_allow_html=True,
+    )
+    page = sb.radio(
+        'Section',
+        ['Hypothesis', 'Data', 'Models', 'Results', 'Strategy', 'Conclusion'],
+        label_visibility='collapsed',
+    )
+
+    sb.markdown('<hr/>', unsafe_allow_html=True)
+
+    # Highlights panel
+    try:
+        best = load_table('best_models')
+        summary = load_table('summary')
+        top = best.loc[best['Sharpe_Straddle'].idxmax()]
+        full_ols = summary[(summary['Feature_Spec'] == 'HAR-RV+IV+OVX+TOSI')
+                           & (summary['Model_Family'] == 'OLS')].iloc[0]
+        sb.markdown(
+            f"""<div style="font-size:0.7rem; letter-spacing:0.08em; color:#A8B5C2;
+                          text-transform:uppercase; margin-bottom:0.4rem;">Highlights</div>
+                <div style="background:rgba(255,255,255,0.05); padding:0.7rem 0.8rem;
+                            border-radius:8px; border:1px solid rgba(255,255,255,0.08);
+                            margin-bottom:0.6rem;">
+                  <div style="font-size:0.7rem; color:#A8B5C2;">Top Sharpe</div>
+                  <div style="font-size:1.25rem; font-weight:800; color:white;">
+                    {top['Sharpe_Straddle']:.2f}</div>
+                  <div style="font-size:0.78rem; color:#D8E0E8;">{top['Ticker']} · {top['Model']}</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); padding:0.7rem 0.8rem;
+                            border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+                  <div style="font-size:0.7rem; color:#A8B5C2;">Best avg RMSE</div>
+                  <div style="font-size:1.25rem; font-weight:800; color:white;">
+                    {full_ols['Avg_RMSE']:.4f}</div>
+                  <div style="font-size:0.78rem; color:#D8E0E8;">Full spec · OLS</div>
+                </div>""",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+
+    sb.markdown('<hr/>', unsafe_allow_html=True)
+    sb.markdown(
+        f"""<div style="font-size:0.78rem; color:#D8E0E8; line-height:1.5;">
+              <div style="font-size:0.7rem; letter-spacing:0.08em; color:#A8B5C2;
+                          text-transform:uppercase; margin-bottom:0.3rem;">OOS Window</div>
+              {meta['oos_start']} → {meta['oos_end']}
+              <div style="font-size:0.7rem; letter-spacing:0.08em; color:#A8B5C2;
+                          text-transform:uppercase; margin:0.7rem 0 0.3rem 0;">Tickers</div>
+              {' · '.join(meta['tickers'])}
+            </div>""",
+        unsafe_allow_html=True,
+    )
+
+    return page
+
+
 def main():
+    inject_css()
+
     if not artifacts_ready():
         st.error(
             'Precomputed artifacts not found.  Run HAR_model.ipynb end-to-end first '
@@ -579,21 +1116,7 @@ def main():
         st.stop()
 
     meta = load_meta()
-
-    st.sidebar.title('✈️ Airline Volatility')
-    st.sidebar.caption('CS 329e · Group 23')
-    page = st.sidebar.radio(
-        'Section',
-        ['Hypothesis', 'Data', 'Models', 'Results', 'Strategy', 'Conclusion'],
-        label_visibility='collapsed',
-    )
-    st.sidebar.divider()
-    st.sidebar.markdown(
-        f"**OOS window**\n\n{meta['oos_start']} → {meta['oos_end']}"
-    )
-    st.sidebar.markdown(
-        f"**Tickers**  \n{', '.join(meta['tickers'])}"
-    )
+    page = render_sidebar(meta)
 
     {
         'Hypothesis': page_hypothesis,

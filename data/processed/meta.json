@@ -3,6 +3,7 @@
     "DAL",
     "UAL",
     "LUV",
+    "AAL",
     "JETS"
   ],
   "model_families": [
@@ -74,6 +75,7 @@
     "DAL": "#0B6E4F",
     "UAL": "#3C91E6",
     "LUV": "#F4A259",
+    "AAL": "#A1303A",
     "JETS": "#7A5195"
   },
   "model_colors": {
