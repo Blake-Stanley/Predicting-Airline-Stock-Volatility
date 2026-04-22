@@ -101,14 +101,14 @@ Requires `HAR_model.ipynb` to have been run first to populate `data/processed/`.
 pip install -r requirements.txt
 ```
 
-Core dependencies: `pandas`, `numpy`, `matplotlib`, `plotly`, `scikit-learn`, `xgboost`, `yfinance`, `statsmodels`, `scipy`, `streamlit`, `openpyxl`
+Core dependencies: `pandas`, `numpy`, `matplotlib`, `plotly`, `scikit-learn`, `xgboost`, `statsmodels`, `scipy`, `streamlit`, `openpyxl`
 
 ---
 
 ## Running
 
 ```bash
-# 1. Run the final model notebook (requires internet for yfinance; Alpaca data already local)
+# 1. Run the final model notebook (Alpaca data is already local)
 jupyter notebook HAR_model.ipynb
 
 # 2. Launch the dashboard
