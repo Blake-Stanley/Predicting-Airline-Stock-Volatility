@@ -553,6 +553,63 @@ def page_background(meta):
     st.plotly_chart(oil_fig, use_container_width=True)
 
 
+def _render_jets_oil_overlay(meta):
+    start = pd.Timestamp('2021-04-01')
+
+    rv_panel = load_table('rv_panel')
+    jets = (rv_panel[rv_panel['symbol'] == 'JETS']
+            .assign(trade_date=lambda d: pd.to_datetime(d['trade_date']))
+            .query('trade_date >= @start')
+            .sort_values('trade_date')
+            .drop_duplicates('trade_date'))
+    jets_rv = jets['realized_vol_daily'] * np.sqrt(252) * 100
+
+    ovx = (load_table('ovx')
+           .assign(Date=lambda d: pd.to_datetime(d['Date']))
+           .query('Date >= @start')
+           .sort_values('Date'))
+
+    tosi = (load_table('tosi')
+            .assign(Date=lambda d: pd.to_datetime(d['Date']))
+            .query('Date >= @start')
+            .sort_values('Date'))
+
+    # Min-max rescale TOSI into the OVX range so it shares the same axis
+    t = tosi['TOSI']
+    ref_min, ref_max = ovx['OVX'].min(), ovx['OVX'].max()
+    t_scaled = (t - t.min()) / (t.max() - t.min() + 1e-9) * (ref_max - ref_min) + ref_min
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=jets['trade_date'], y=jets_rv,
+        mode='lines', name='JETS RV (annualized %)',
+        line=dict(color=meta['airline_colors'].get('JETS', PALETTE['accent']), width=1.8),
+    ))
+    fig.add_trace(go.Scatter(
+        x=ovx['Date'], y=ovx['OVX'],
+        mode='lines', name='OVX',
+        line=dict(color='#E07B39', width=1.8),
+    ))
+    fig.add_trace(go.Scatter(
+        x=tosi['Date'], y=t_scaled,
+        mode='lines+markers', name='TOSI (rescaled to OVX range)',
+        line=dict(color=PALETTE['accent_dk'], width=2, dash='dot'),
+        marker=dict(size=5),
+    ))
+    style_fig(fig,
+              title='JETS Realized Volatility, OVX, and Oil Sentiment (TOSI)  ·  Apr 2021 onward',
+              height=460)
+    fig.update_layout(
+        xaxis=dict(title='Date'),
+        yaxis=dict(title='Annualized Vol % / Rescaled Sentiment'),
+        hovermode='x unified',
+        legend=dict(orientation='h', y=-0.18, x=0.5, xanchor='center'),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption('TOSI is min-max rescaled to the OVX range for visual comparison. '
+               'Original TOSI values are unitless monthly sentiment scores.')
+
+
 def page_hypothesis(meta):
     st.title('Hypothesis')
     st.caption('From an open question to a falsifiable prediction — and how we will put it to the test.')
@@ -562,7 +619,7 @@ def page_hypothesis(meta):
     c1, c2, c3, c4 = st.columns(4)
     steps = [
         ('1 · Observation',
-         'Airlines spend 25–35% of opex on jet fuel. Oil-market uncertainty appears to '
+         'Airlines spend 17–21% of opex on jet fuel. Oil-market uncertainty appears to '
          'move with airline volatility.',
          PALETTE['mute']),
         ('2 · Question',
@@ -627,6 +684,41 @@ def page_hypothesis(meta):
         "and OVX already capture. If oil-news sentiment leads jet-fuel cost "
         "expectations, it should front-run airline vol moves that lagged RV and "
         "options pricing have not yet priced in."
+    )
+
+    # ---- Time-series view: do the three signals actually move together? ----
+    st.markdown('## Do the signals actually move together?')
+    section_intro(
+        'Before testing predictive power formally, the time series themselves should '
+        'show the co-movement our hypothesis assumes. Plotting JETS realized vol against '
+        'OVX and TOSI on the same window lets us eyeball whether oil uncertainty and '
+        'oil-news sentiment line up with airline vol regimes.'
+    )
+    _render_jets_oil_overlay(meta)
+
+    # ---- Correlation structure ----
+    st.markdown('## Monthly correlation structure')
+    section_intro(
+        'Aggregating to monthly observations smooths out daily noise and exposes the '
+        'cross-signal relationships our model will exploit.'
+    )
+    st.plotly_chart(load_figure('correlation'), use_container_width=True)
+    st.markdown(
+        f"""
+        <ul style="color:{PALETTE['ink']}; line-height:1.9em;">
+        <li><strong>OVX ↔ Airline RV:</strong> moderate positive correlation (≈ 0.3–0.5),
+        confirming oil futures volatility co-moves with airline stock volatility —
+        the primary channel we exploit.</li>
+        <li><strong>TOSI ↔ OVX:</strong> TOSI carries a statistically significant negative
+        correlation with OVX. When oil-sector sentiment deteriorates, crude vol spikes.
+        This is the link established in prior research that motivates TOSI as a leading indicator.</li>
+        <li><strong>IV ↔ RV:</strong> strong positive correlation — options markets broadly price in
+        realized vol. The residual (VRP) is what our model targets.</li>
+        <li><strong>TOSI ↔ Airline RV:</strong> weaker but directionally consistent, suggesting
+        TOSI reaches airline vol <em>through</em> the OVX channel rather than directly.</li>
+        </ul>
+        """,
+        unsafe_allow_html=True,
     )
 
     # ---- Visual predictions ----
