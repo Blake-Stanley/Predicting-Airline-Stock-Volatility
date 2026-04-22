@@ -265,6 +265,19 @@ def stat_card(label: str, value: str, sub: str = '', accent: str | None = None):
     """
 
 
+def labeled_card(label: str, body: str, accent: str) -> str:
+    return f"""
+    <div style="background:{PALETTE['card']}; border:1px solid {PALETTE['card_edge']};
+                border-top:3px solid {accent}; border-radius:10px;
+                padding:0.9rem 1.05rem; height:100%;">
+      <div style="font-size:0.72rem; letter-spacing:0.08em; color:{accent};
+                  font-weight:700; text-transform:uppercase;">{label}</div>
+      <div style="margin-top:0.45rem; color:{PALETTE['ink_soft']};
+                  line-height:1.5; font-size:0.9rem;">{body}</div>
+    </div>
+    """
+
+
 def section_intro(text: str):
     st.markdown(
         f"""<div style="color:{PALETTE['ink_soft']}; font-size:0.98rem;
@@ -350,101 +363,203 @@ def _short_month_year(date_str: str) -> str:
 
 # ---------------- Pages ----------------
 
-def page_hypothesis(meta):
-    st.title('Forecasting Airline Realized Volatility')
-    st.caption('HAR-RV + IV + OVX + TOSI  ·  walk-forward out-of-sample evaluation')
+def page_background(meta):
+    st.title('Background')
+    st.caption('Why oil-market turbulence is an airline-investor problem — and the data we assembled to study it.')
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.markdown(f"**Tickers**  \n{', '.join(meta['tickers'])}")
-    c2.markdown(f"**Feature specs**  \n{len(meta['feature_specs'])} (HAR-RV, +IV, +OVX, +TOSI and combos)")
-    c3.markdown(f"**Model families**  \n{', '.join(meta['model_families'])}")
-    c4.markdown(f"**OOS window**  \n{meta['oos_start']} → {meta['oos_end']}")
-    st.markdown('---')
+    # ---- Opening: the question ----
+    st.markdown(
+        f"""
+        <div style="background:{PALETTE['paper_alt']}; border-left:5px solid {PALETTE['accent']};
+                    padding:1.1rem 1.3rem; border-radius:10px; margin:0.4rem 0 1.4rem 0;">
+          <div style="font-size:0.72rem; letter-spacing:0.08em; color:{PALETTE['accent_dk']};
+                      font-weight:700; text-transform:uppercase;">Our question</div>
+          <div style="font-size:1.25rem; font-weight:600; color:{PALETTE['ink']};
+                      line-height:1.45; margin-top:0.25rem;">
+            How does volatility in crude oil futures — along with oil-market sentiment —
+            impact the volatility of airline stocks?
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown('## The thesis')
+    # ---- Why airlines are unique ----
+    st.markdown('## Why airlines are the natural testbed')
     st.markdown(
         """
-        **Variance Risk Premium (VRP)** is the gap between what option markets *expect*
-        and what actually *happens*:
+        Jet fuel is the single largest variable line on an airline's income statement —
+        **25–35% of operating expenses**. That exposure means oil-market uncertainty
+        doesn't stay isolated: it flows directly into airline profitability, investor
+        expectations, and ultimately stock-price behavior.
+
+        What makes the setup interesting is the framing. We are not asking whether
+        oil *prices* move airline stocks — that link is well known. We are asking
+        whether oil *volatility* and *sentiment* **lead** airline stock volatility:
+
+        > *Can movements in oil markets today help predict airline stock volatility tomorrow?*
+        """
+    )
+
+    # ---- Why it matters ----
+    st.markdown('## Why a predictive answer would matter')
+    c1, c2, c3 = st.columns(3)
+    who = [
+        ('Portfolio managers',
+         'Adjust airline exposure ahead of oil-driven volatility shifts.',
+         PALETTE['accent']),
+        ('Options traders',
+         'Build forecasts that generate alpha against ATM straddle pricing.',
+         PALETTE['good']),
+        ('Researchers',
+         'Better understand cross-market volatility spillovers between commodities and equities.',
+         PALETTE['warn']),
+    ]
+    for col, (lbl, body, accent) in zip([c1, c2, c3], who):
+        col.markdown(labeled_card(lbl, body, accent), unsafe_allow_html=True)
+
+    # ---- The data ----
+    st.markdown('## The evidence we assembled')
+    section_intro(
+        'Three Bloomberg-sourced datasets let us measure oil-market uncertainty '
+        'alongside airline stock behavior, day by day:'
+        '<ul style="margin-top:0.5rem; line-height:1.7;">'
+        '<li><b>CBOE Crude Oil Volatility Index (OVX)</b> — market expectations of oil price volatility.</li>'
+        '<li><b>Text Oil Sentiment Indicator (TOSI)</b> — sentiment scores derived from oil-market news.</li>'
+        '<li><b>Daily implied volatility</b> for American, Delta, United, Southwest, and the JETS ETF '
+        '— derived from the options market as a forward-looking view of airline risk.</li>'
+        '</ul>'
+    )
+
+    inventory = load_table('data_inventory')
+    st.dataframe(inventory, use_container_width=True, hide_index=True)
+
+    # ---- One-chart narrative: realized vol across the sector ----
+    st.markdown('### The airline sector is a volatility-clustered asset class')
+    section_intro(
+        'Realized volatility across the four airlines and JETS moves in tight formation — '
+        'huge shared spikes, long calm stretches in between. This is the behavior our '
+        'forecasts will have to beat.'
+    )
+    rv_fig = load_figure('realized_vol')
+    rv_fig.add_annotation(
+        x='2025-02-15', y=0.060,
+        text='Tariff shock drove recession fears;<br>airlines withdrew full-year guidance',
+        showarrow=True, arrowhead=2, arrowwidth=1,
+        arrowcolor=PALETTE['ink'], arrowsize=0.8,
+        ax=-180, ay=30,
+        font=dict(size=11, color=PALETTE['ink']),
+        align='center',
+        bgcolor='rgba(0,0,0,0)',
+        bordercolor='rgba(0,0,0,0)',
+    )
+    rv_fig.add_annotation(
+        x='2026-03-10', y=0.042,
+        text='U.S. strikes on Iran sent oil surging;<br>Middle East airspace closures hit airlines',
+        showarrow=True, arrowhead=2, arrowwidth=1,
+        arrowcolor=PALETTE['ink'], arrowsize=0.8,
+        ax=-80, ay=-90,
+        font=dict(size=11, color=PALETTE['ink']),
+        align='center',
+        bgcolor='rgba(0,0,0,0)',
+        bordercolor='rgba(0,0,0,0)',
+    )
+    rv_fig.update_xaxes(range=['2020-09-01', '2026-06-01'])
+    st.plotly_chart(rv_fig, use_container_width=True)
+
+    # ---- The co-movement chart that sets up the hypothesis ----
+    st.markdown('### Oil uncertainty visibly tracks airline volatility')
+    section_intro(
+        'Overlaying OVX and TOSI on airline realized vol, the co-movement is obvious '
+        "at crisis moments. The open question — which we test in the next tab — is "
+        'whether it is *predictive* or merely *contemporaneous*.'
+    )
+    st.plotly_chart(load_figure('oil_drivers'), use_container_width=True)
+
+
+def page_hypothesis(meta):
+    st.title('Hypothesis')
+    st.caption('From an open question to a falsifiable prediction — and how we will put it to the test.')
+
+    # ---- Scientific-method scaffolding ----
+    st.markdown('## From question to testable prediction')
+    c1, c2, c3, c4 = st.columns(4)
+    steps = [
+        ('1 · Observation',
+         'Airlines spend 25–35% of opex on jet fuel. Oil-market uncertainty appears to '
+         'move with airline volatility.',
+         PALETTE['mute']),
+        ('2 · Question',
+         'Does oil-market volatility and sentiment *lead* airline stock volatility, '
+         'or only co-move with it?',
+         PALETTE['accent']),
+        ('3 · Hypothesis',
+         'Lagged OVX and TOSI carry predictive information about airline realized '
+         'volatility beyond what prices and options already reveal.',
+         PALETTE['warn']),
+        ('4 · Test',
+         'Forecast next-day volatility walk-forward out-of-sample and check whether '
+         'adding each signal beats the baseline on Diebold-Mariano and straddle P&L.',
+         PALETTE['good']),
+    ]
+    for col, (lbl, body, accent) in zip([c1, c2, c3, c4], steps):
+        col.markdown(labeled_card(lbl, body, accent), unsafe_allow_html=True)
+
+    # ---- The forecasting target ----
+    st.markdown('## What exactly we forecast')
+    st.markdown(
+        """
+        Our target is the **Variance Risk Premium (VRP)** — the gap between what the
+        options market *expects* tomorrow's volatility to be and what *actually* happens:
         """
     )
     st.latex(r'\text{VRP}_t = \log\text{RV}_{t+1} - \log\text{IV}_t')
     st.markdown(
         """
-        When predicted VRP is positive, realized vol is expected to exceed implied vol —
-        buy the straddle. When negative, sell it. If we forecast VRP more accurately than
-        the market prices it, we earn a persistent premium.
+        A positive predicted VRP says the market is under-pricing risk (buy the
+        straddle); negative says it is over-pricing (sell). If our forecast beats the
+        market's implicit one, we earn a persistent premium — and we gain a clean way
+        to *measure* whether each new signal actually helps.
 
-        **HAR (Heterogeneous AutoRegressive)** decomposes volatility memory into
-        daily, weekly (5-day), and monthly (22-day) components — short-, mid-, and
-        long-horizon traders each contribute to today's price formation.
+        The baseline model is **HAR (Heterogeneous AutoRegressive)**, which decomposes
+        volatility memory into daily, weekly, and monthly components — short-, mid-,
+        and long-horizon traders each contributing to today's price formation.
         """
     )
 
-    st.markdown("## What we're testing")
+    # ---- Feature-level hypotheses ----
+    st.markdown('## Four nested hypotheses')
+    section_intro(
+        'Each feature we add to HAR-RV encodes a distinct economic story. '
+        'We keep the one whose story survives an out-of-sample test.'
+    )
     st.markdown(
         """
-        Each additional feature has an economic story. We test whether the story
-        shows up out-of-sample:
-
-        | Spec                     | Hypothesis                                                              |
-        | ------------------------ | ----------------------------------------------------------------------- |
-        | **HAR-RV**               | Volatility clustering alone explains next-day vol                       |
-        | **+ IV**                 | Options markets contain forward-looking information HAR misses          |
-        | **+ OVX**                | Oil vol is a jet-fuel cost signal that leaks into airline vol          |
-        | **+ TOSI**               | Oil-stock sentiment (Texas Oil Stock Index) provides additional signal |
-
-        We evaluate with **Diebold-Mariano** tests on squared forecast errors and
-        back out a straddle P&L using close-to-close returns against ATM premiums.
+        | Spec | Economic story we're testing |
+        | --- | --- |
+        | **HAR-RV** | Volatility clustering alone explains next-day vol — the null. |
+        | **+ IV** | Options markets contain forward-looking information that HAR misses. |
+        | **+ OVX** | Oil-market uncertainty is a jet-fuel cost signal that leaks into airline vol. |
+        | **+ TOSI** | Oil-news sentiment front-runs oil-price moves — and therefore airline vol. |
         """
     )
 
     st.info(
-        "**Central TOSI hypothesis:** The Texas Oil Stock Index (TOSI) — a sentiment "
-        "signal derived from oil-sector equity performance — adds statistically significant "
-        "predictive power for airline realized volatility *beyond* what price-based indicators "
-        "(HAR-RV, IV, OVX) already capture.  If oil-sector equity sentiment leads jet-fuel "
-        "cost expectations, it should front-run airline vol moves that lagged RV and options "
-        "pricing have not yet priced in."
+        "**Central claim to be tested:** The Text Oil Sentiment Indicator (TOSI) — "
+        "a sentiment signal from oil-market news — adds statistically significant "
+        "predictive power for airline realized volatility *beyond* what HAR-RV, IV, "
+        "and OVX already capture. If oil-news sentiment leads jet-fuel cost "
+        "expectations, it should front-run airline vol moves that lagged RV and "
+        "options pricing have not yet priced in."
     )
 
-    st.markdown("## Why it's non-trivial")
-    st.markdown(
-        """
-        * **IV contamination** — naively regressing RV on IV lets the target leak.
-          We forecast the VRP *difference*, and IV enters only as the current level.
-        * **Threshold selection** — the trading signal uses a |VRP| threshold chosen
-          by nested walk-forward Sharpe, so the threshold itself isn't cherry-picked.
-        * **Straddle economics** — P&L uses actual close-to-close |return| against
-          the Black-Scholes ATM premium ($\\sqrt{2/\\pi} \\cdot \\sigma_{\\text{IV}}$),
-          not intraday sqrt(RV). That includes overnight gaps the buyer actually receives.
-        """
+    # ---- Visual predictions ----
+    st.markdown('## What each relationship should look like if true')
+    section_intro(
+        'If the hypothesis holds, we should see a visible slope when we line up each '
+        "driver against future airline volatility. These scatters are the visual form "
+        'of each prediction — the next tabs put them through formal tests.'
     )
-
-
-def page_data(meta):
-    st.title('Data')
-    inventory = load_table('data_inventory')
-    cleaning = load_table('cleaning_log')
-
-    c1, c2 = st.columns([1.2, 1])
-    with c1:
-        st.subheader('Inventory')
-        st.dataframe(inventory, use_container_width=True, hide_index=True)
-    with c2:
-        st.subheader('Cleaning log')
-        st.dataframe(cleaning, use_container_width=True, hide_index=True)
-
-    st.subheader('Realized volatility across the sector')
-    st.plotly_chart(load_figure('realized_vol'), use_container_width=True)
-
-    st.subheader('Oil volatility, oil sentiment, and airline RV')
-    st.plotly_chart(load_figure('oil_drivers'), use_container_width=True)
-
-    st.subheader('Monthly correlation structure')
-    st.plotly_chart(load_figure('correlation'), use_container_width=True)
-
-    st.subheader('Driver scatter facets')
     tab_iv, tab_ovx, tab_tosi = st.tabs(['IV → next-day RV', 'OVX → next-month RV', 'TOSI → next-month RV'])
     with tab_iv:
         st.plotly_chart(load_figure('iv_scatter'), use_container_width=True)
@@ -452,6 +567,14 @@ def page_data(meta):
         st.plotly_chart(load_figure('ovx_scatter'), use_container_width=True)
     with tab_tosi:
         st.plotly_chart(load_figure('tosi_scatter'), use_container_width=True)
+
+    # ---- Scope of the experiment ----
+    st.markdown('## Scope of the experiment')
+    c1, c2, c3, c4 = st.columns(4)
+    c1.markdown(f"**Tickers**  \n{', '.join(meta['tickers'])}")
+    c2.markdown(f"**Feature specs**  \n{len(meta['feature_specs'])} (HAR-RV, +IV, +OVX, +TOSI and combos)")
+    c3.markdown(f"**Model families**  \n{', '.join(meta['model_families'])}")
+    c4.markdown(f"**OOS window**  \n{meta['oos_start']} → {meta['oos_end']}")
 
 
 def page_models(meta):
@@ -1053,7 +1176,7 @@ def render_sidebar(meta):
     )
     page = sb.radio(
         'Section',
-        ['Hypothesis', 'Data', 'Models', 'Results', 'Strategy', 'Conclusion'],
+        ['Background', 'Hypothesis', 'Models', 'Results', 'Strategy', 'Conclusion'],
         label_visibility='collapsed',
     )
 
@@ -1119,8 +1242,8 @@ def main():
     page = render_sidebar(meta)
 
     {
+        'Background': page_background,
         'Hypothesis': page_hypothesis,
-        'Data':       page_data,
         'Models':     page_models,
         'Results':    page_results,
         'Strategy':   page_strategy,
