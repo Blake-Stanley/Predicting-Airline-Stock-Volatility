@@ -389,8 +389,9 @@ def page_background(meta):
     st.markdown(
         """
         Jet fuel is the single largest variable line on an airline's income statement —
-        **25–35% of operating expenses**. That exposure means oil-market uncertainty
-        doesn't stay isolated: it flows directly into airline profitability, investor
+        **17–21% of total operating expenses** for the major U.S. carriers. Unlike
+        labor or maintenance, jet fuel prices track crude oil in near real-time, so
+        oil-market uncertainty flows directly into airline profitability, investor
         expectations, and ultimately stock-price behavior.
 
         What makes the setup interesting is the framing. We are not asking whether
@@ -400,6 +401,33 @@ def page_background(meta):
         > *Can movements in oil markets today help predict airline stock volatility tomorrow?*
         """
     )
+
+    fuel_labels = ['AAL<br>(American)', 'UAL<br>(United)', 'DAL<br>(Delta)', 'LUV<br>(Southwest)']
+    fuel_values = [20.2, 21.0, 17.0, 19.0]
+    bar_colors  = [meta['airline_colors'].get(t, PALETTE['accent'])
+                   for t in ['AAL', 'UAL', 'DAL', 'LUV']]
+    avg = sum(fuel_values) / len(fuel_values)
+
+    fig_fuel = go.Figure(go.Bar(
+        x=fuel_labels, y=fuel_values,
+        marker_color=bar_colors,
+        text=[f'{v}%' for v in fuel_values],
+        textposition='outside',
+        textfont=dict(color=PALETTE['ink'], size=14),
+        width=0.5,
+    ))
+    fig_fuel.add_hline(
+        y=avg, line_dash='dash', line_color=PALETTE['mute'],
+        annotation_text=f'sector avg {avg:.1f}%',
+        annotation_font_color=PALETTE['ink_soft'],
+    )
+    style_fig(fig_fuel, title='Fuel as % of Annual Operating Expenses', height=380)
+    fig_fuel.update_layout(
+        yaxis=dict(title='% of Operating Expenses', range=[0, 26]),
+        margin=dict(l=60, r=40, t=70, b=50),
+        showlegend=False,
+    )
+    st.plotly_chart(fig_fuel, use_container_width=True)
 
     # ---- Why it matters ----
     st.markdown('## Why a predictive answer would matter')
@@ -581,44 +609,140 @@ def page_hypothesis(meta):
 
 def page_models(meta):
     st.title('Models')
-    feature_specs = load_table('feature_specs')
 
-    st.markdown(
-        """
-        We evaluate **four model families** across **six feature specifications**
-        on a common walk-forward OOS schedule.  OLS and Ridge are linear;
-        Random Forest and XGBoost capture non-linear interactions between
-        HAR components and macro signals.
-        """
+    # ── HAR-X formula family ──────────────────────────────────────
+    st.subheader('The HAR-X Model Family')
+    section_intro(
+        'All models forecast the <strong>Variance Risk Premium</strong> one trading day ahead. '
+        'The target is:'
+    )
+    st.latex(r'\text{VRP}_{t+1} = \log\text{RV}_{t+1} - \log\text{IV}_t')
+
+    section_intro(
+        'The <strong>HAR (Heterogeneous AutoRegressive)</strong> baseline decomposes '
+        'realized-vol memory into three horizons, reflecting how different trader types — '
+        'day traders, weekly desks, and monthly macro funds — each contribute to current '
+        'price formation:'
+    )
+    st.latex(
+        r'\underbrace{\text{VRP}_{t+1}}_{\text{target}} = \alpha'
+        r'+ \beta_d \underbrace{\log\text{RV}_t^{(d)}}_{\text{daily}}'
+        r'+ \beta_w \underbrace{\log\text{RV}_t^{(w)}}_{\text{5-day avg}}'
+        r'+ \beta_m \underbrace{\log\text{RV}_t^{(m)}}_{\text{22-day avg}}'
+        r'+ \varepsilon_{t+1}'
     )
 
-    c1, c2 = st.columns(2)
-    with c1:
-        st.subheader('Feature specifications')
-        st.dataframe(feature_specs, use_container_width=True, hide_index=True)
-    with c2:
-        st.subheader('Model families')
-        st.dataframe(
-            pd.DataFrame({
-                'Family': meta['model_families'],
-                'Role': [
-                    'Baseline linear HAR',
-                    'Regularised linear (scaled)',
-                    'Non-linear, nested CV over depth & leaf size',
-                    'Gradient-boosted, nested CV over depth & learning rate',
-                ],
-            }),
-            use_container_width=True, hide_index=True,
-        )
+    section_intro(
+        'Adding <strong>implied volatility</strong> captures the options market\'s '
+        'forward-looking view — the single biggest improvement over the baseline:'
+    )
+    st.latex(
+        r'\text{VRP}_{t+1} = \alpha'
+        r'+ \beta_d \log\text{RV}_t^{(d)} + \beta_w \log\text{RV}_t^{(w)} + \beta_m \log\text{RV}_t^{(m)}'
+        r'+ \gamma\,\log\text{IV}_t'
+        r'+ \varepsilon_{t+1}'
+    )
 
-    st.subheader('Walk-forward protocol')
+    section_intro(
+        'The <strong>full HAR-X</strong> spec adds oil-market signals — OVX at three '
+        'horizons and TOSI (level + monthly change) as a sentiment layer:'
+    )
+    st.latex(
+        r'\text{VRP}_{t+1} = \alpha'
+        r'+ \beta_d \log\text{RV}_t^{(d)} + \beta_w \log\text{RV}_t^{(w)} + \beta_m \log\text{RV}_t^{(m)}'
+        r'+ \gamma\,\log\text{IV}_t'
+        r'+ \delta_d \log\text{OVX}_t^{(d)} + \delta_w \log\text{OVX}_t^{(w)} + \delta_m \log\text{OVX}_t^{(m)}'
+        r'+ \theta_1\,\text{TOSI}_t + \theta_2\,\Delta\text{TOSI}_t'
+        r'+ \varepsilon_{t+1}'
+    )
+
+    st.markdown('---')
+
+    # ── Walk-forward protocol (condensed) ────────────────────────
+    st.subheader('Walk-forward evaluation protocol')
     render_metric_row([
         ('Min train days', '756', '3 trading years'),
         ('Test window', '63 days', '≈ one quarter'),
-        ('Step', '63 days', 'Expanding training'),
-        ('Threshold grid', '25–75 pctiles', 'of |predicted VRP| on training'),
+        ('Step', '63 days', 'Expanding window'),
+        ('Threshold grid', '25–75 pctiles', 'of |predicted VRP| on in-sample fold'),
     ])
 
+    st.markdown('---')
+
+    # ── Viz 1 & 2: JETS RMSE and Sharpe by feature spec ──────────
+    st.subheader('Feature spec performance — JETS')
+    section_intro(
+        'Each bar below represents OOS performance for JETS under that feature '
+        'specification. Left: forecast accuracy (lower RMSE = better fit). '
+        'Right: straddle Sharpe for OLS (higher = more tradeable edge). '
+        'The dashed line marks the HAR-RV baseline.'
+    )
+
+    spec_order = [
+        'HAR-RV', 'HAR-RV+IV', 'HAR-RV+OVX', 'HAR-RV+OVX+TOSI',
+        'HAR-RV+IV+OVX', 'HAR-RV+IV+OVX+TOSI',
+    ]
+    spec_short = ['HAR-RV', '+IV', '+OVX', '+OVX\n+TOSI', '+IV\n+OVX', '+IV+OVX\n+TOSI']
+
+    results = load_table('results')
+    jets = results[results['Ticker'] == 'JETS']
+    baseline_rmse  = jets.loc[(jets['Feature_Spec'] == 'HAR-RV') & (jets['Model_Family'] == 'OLS'), 'RMSE'].iloc[0]
+    baseline_sharpe = jets.loc[(jets['Feature_Spec'] == 'HAR-RV') & (jets['Model_Family'] == 'OLS'), 'Sharpe_Straddle'].iloc[0]
+
+    fam_colors = {f: meta['model_colors'].get(f, PALETTE['mute']) for f in meta['model_families']}
+
+    col1, col2 = st.columns(2)
+
+    # — RMSE chart (all 4 families, grouped) —
+    with col1:
+        fig_rmse = go.Figure()
+        for fam in meta['model_families']:
+            sub = jets[jets['Model_Family'] == fam].set_index('Feature_Spec').reindex(spec_order)
+            fig_rmse.add_trace(go.Bar(
+                name=fam, x=spec_short, y=sub['RMSE'].values,
+                marker_color=fam_colors[fam],
+            ))
+        fig_rmse.add_hline(
+            y=baseline_rmse, line_dash='dash', line_color=PALETTE['mute'],
+            annotation_text='HAR-RV baseline', annotation_font_color=PALETTE['ink_soft'],
+        )
+        style_fig(fig_rmse, title='RMSE by Feature Spec (lower = better)', height=420)
+        fig_rmse.update_layout(
+            barmode='group',
+            yaxis=dict(title='RMSE', range=[0.793, 0.836]),
+            legend=dict(orientation='h', y=-0.22, x=0.5, xanchor='center'),
+            margin=dict(l=50, r=20, t=50, b=80),
+        )
+        st.plotly_chart(fig_rmse, use_container_width=True)
+
+    # — Sharpe chart (OLS only — cleanest linear story) —
+    with col2:
+        ols = jets[jets['Model_Family'] == 'OLS'].set_index('Feature_Spec').reindex(spec_order)
+        bar_colors_sharpe = [
+            PALETTE['bad'] if v < baseline_sharpe else PALETTE['good']
+            for v in ols['Sharpe_Straddle'].values
+        ]
+        fig_sharpe = go.Figure(go.Bar(
+            x=spec_short, y=ols['Sharpe_Straddle'].values,
+            marker_color=bar_colors_sharpe,
+            text=[f'{v:.2f}' for v in ols['Sharpe_Straddle'].values],
+            textposition='outside', textfont=dict(color=PALETTE['ink']),
+        ))
+        fig_sharpe.add_hline(
+            y=baseline_sharpe, line_dash='dash', line_color=PALETTE['mute'],
+            annotation_text='HAR-RV baseline', annotation_font_color=PALETTE['ink_soft'],
+        )
+        style_fig(fig_sharpe, title='Straddle Sharpe — OLS (higher = better)', height=420)
+        fig_sharpe.update_layout(
+            yaxis=dict(title='OOS Sharpe', range=[0, 3.2]),
+            margin=dict(l=50, r=20, t=50, b=80),
+            showlegend=False,
+        )
+        st.plotly_chart(fig_sharpe, use_container_width=True)
+
+    st.markdown('---')
+
+    # ── Feature importance ────────────────────────────────────────
     st.subheader('Tree-based feature importance — JETS')
     st.plotly_chart(load_figure('feature_importance_jets'), use_container_width=True)
 
@@ -671,12 +795,14 @@ def page_results(meta):
     rmse_pivot = results.pivot_table(
         index='Feature_Spec', columns='Model_Family', values='RMSE', aggfunc='mean'
     ).reindex(index=list(meta['feature_specs'].keys()), columns=meta['model_families'])
+    z_vals = rmse_pivot.values
+    text_vals = [['' if np.isnan(v) else f'{v:.4f}' for v in row] for row in z_vals]
     fig = go.Figure(go.Heatmap(
-        z=rmse_pivot.values,
-        x=rmse_pivot.columns, y=rmse_pivot.index,
+        z=z_vals,
+        x=list(rmse_pivot.columns), y=list(rmse_pivot.index),
         colorscale='RdYlGn_r',
-        text=np.round(rmse_pivot.values, 4), texttemplate='%{text}',
-        hovertemplate='Spec=%{y}<br>Family=%{x}<br>Avg RMSE=%{z:.4f}<extra></extra>',
+        text=text_vals, texttemplate='%{text}',
+        hovertemplate='Spec=%{y}<br>Family=%{x}<br>Avg RMSE=%{z}<extra></extra>',
         colorbar=dict(title='Avg RMSE'),
     ))
     style_fig(fig, height=460)
