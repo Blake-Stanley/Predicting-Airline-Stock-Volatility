@@ -466,10 +466,56 @@ def page_background(meta):
     st.markdown('### The airline sector is a volatility-clustered asset class')
     section_intro(
         'Realized volatility across the four airlines and JETS moves in tight formation — '
-        'huge shared spikes, long calm stretches in between. This is the behavior our '
-        'forecasts will have to beat.'
+        'huge shared spikes, long calm stretches in between. Overlaying OVX (right axis) '
+        'shows that the biggest airline-vol regimes are oil-vol regimes too. This is the '
+        'behavior our forecasts will have to beat.'
     )
     rv_fig = load_figure('realized_vol')
+
+    # ---- Overlay OVX on a secondary y-axis (from main branch) ----
+    ovx_dates, ovx_vals = None, None
+    for table_name in ['ovx_data', 'ovx_series', 'ovx', 'market_data', 'raw_features']:
+        try:
+            df = load_table(table_name)
+            date_col = next((c for c in df.columns if 'date' in c.lower()), None)
+            val_col  = next((c for c in df.columns if 'ovx' in c.lower()), None)
+            if date_col and val_col:
+                ovx_dates = pd.to_datetime(df[date_col])
+                ovx_vals  = df[val_col]
+                break
+        except FileNotFoundError:
+            continue
+
+    if ovx_dates is None:
+        try:
+            preds = load_table('predictions')
+            val_col = next((c for c in preds.columns if 'ovx' in c.lower()), None)
+            if val_col and 'trade_date' in preds.columns:
+                tmp = (preds[['trade_date', val_col]]
+                       .drop_duplicates('trade_date')
+                       .sort_values('trade_date'))
+                ovx_dates = pd.to_datetime(tmp['trade_date'])
+                ovx_vals  = tmp[val_col]
+        except (FileNotFoundError, StopIteration):
+            pass
+
+    if ovx_dates is not None:
+        rv_fig.add_trace(go.Scatter(
+            x=ovx_dates, y=ovx_vals,
+            mode='lines', name='OVX',
+            line=dict(color='#E07B39', width=2),
+            yaxis='y2',
+        ))
+        rv_fig.update_layout(
+            yaxis2=dict(
+                title='OVX', overlaying='y', side='right',
+                showgrid=False,
+                title_font=dict(color='#E07B39'),
+                tickfont=dict(color='#E07B39'),
+            ),
+            legend=dict(orientation='h', y=-0.15, x=0.5, xanchor='center'),
+        )
+
     rv_fig.add_annotation(
         x='2025-02-15', y=0.060,
         text='Tariff shock drove recession fears;<br>airlines withdrew full-year guidance',
